@@ -421,6 +421,8 @@ impl VillageEsService {
             3 => parabellum_types::common::Speed::X3,
             5 => parabellum_types::common::Speed::X5,
             10 => parabellum_types::common::Speed::X10,
+            50 => parabellum_types::common::Speed::X50,
+            100 => parabellum_types::common::Speed::X100,
             _ => parabellum_types::common::Speed::X1,
         };
         let next_cp_required = required_cp(speed, culture.player_village_count + 1);

@@ -10,6 +10,8 @@ pub enum Speed {
     X3,
     X5,
     X10,
+    X50,
+    X100,
 }
 
 impl From<i8> for Speed {
@@ -19,6 +21,8 @@ impl From<i8> for Speed {
             3 => Self::X3,
             5 => Self::X5,
             10 => Self::X10,
+            50 => Self::X50,
+            100 => Self::X100,
             _ => Self::X1,
         }
     }

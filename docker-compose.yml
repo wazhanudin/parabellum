@@ -1,34 +1,51 @@
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: parabellum_db
-    restart: always
-    environment:
-      - POSTGRES_USER=parabellum
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=parabellum_dev
-    ports:
-      - "5432:5432"
-    volumes:
-      - parabellum_data:/var/lib/postgresql/data
-
+  # 1. Self-Initializing Game Server Node
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      - db
+    container_name: parabellum
+    restart: always
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgres://parabellum:password@db:5432/parabellum_dev
-      TEST_DATABASE_URL: postgres://parabellum:password@db:5432/parabellum_test
-      RUST_LOG: info,parabellum=debug,tower_http=debug,sqlx=info
+      - RUST_LOG=info,parabellum=info,parabellum_infra=info,parabellum_web=info,tower_http=warn,sqlx=warn
+      - PORT=8080
+      - DATABASE_URL=${DATABASE_URL}
+      - PARABELLUM_WORLD_SIZE=${PARABELLUM_WORLD_SIZE}
+      - PARABELLUM_SERVER_SPEED=${PARABELLUM_SERVER_SPEED}
+      - PARABELLUM_ACCESS_TOKEN_TTL_SECS=${PARABELLUM_ACCESS_TOKEN_TTL_SECS}
+      - PARABELLUM_REFRESH_TOKEN_TTL_SECS=${PARABELLUM_REFRESH_TOKEN_TTL_SECS}
+      - PARABELLUM_TOKEN_SIGNING_KEY=${PARABELLUM_TOKEN_SIGNING_KEY}
     ports:
-      - "8000:8000"
-    user: "${UID}:${GID}"
+      - "3030:8080" # Maps local port 3000 directly to your local Tailscale mesh IP
+    networks:
+      - main
     volumes:
       - ./logs:/app/logs
+      - ./:/app/mnt
+    depends_on:
+      db:
+        condition: service_healthy
 
-volumes:
-  parabellum_data:
+  # 2. Production Database Core Engine
+  db:
+    image: postgres:16-alpine
+    container_name: parabellum_db
+    restart: always
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    networks:
+      - main
+
+networks:
+  main:

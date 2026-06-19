@@ -18,6 +18,9 @@ pub enum GameError {
     #[error("Hero attribute over limit 100")]
     HeroAttributeOverflow,
 
+    #[error("Hero points can only be reset at level 0")]
+    HeroPointsResetLocked,
+
     #[error("Hero is not dead")]
     HeroNotDead,
 
@@ -109,6 +112,9 @@ pub enum GameError {
 
     #[error("{0} is an invalid level for {1:?}")]
     InvalidBuildingLevel(u8, BuildingName),
+
+    #[error("Building slot {slot_id} cannot be downgraded")]
+    BuildingCannotBeDowngraded { slot_id: u8 },
 
     #[error("Invalid unit index: {0}")]
     InvalidUnitIndex(u8),

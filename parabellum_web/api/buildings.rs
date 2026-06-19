@@ -1802,8 +1802,9 @@ fn missing_building_requirements(
             let level = village
                 .buildings()
                 .iter()
-                .find(|vb| vb.building.name == req.0)
+                .filter(|vb| vb.building.name == req.0)
                 .map(|vb| vb.building.level)
+                .max()
                 .unwrap_or(0);
 
             if level >= req.1 {
@@ -1816,6 +1817,33 @@ fn missing_building_requirements(
             }
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use parabellum_game::test_utils::{VillageFactoryOptions, village_factory};
+    use parabellum_types::buildings::BuildingName;
+
+    #[test]
+    fn missing_building_requirements_uses_highest_matching_building_level() {
+        let mut village = village_factory(VillageFactoryOptions::default());
+
+        village
+            .set_building_level_at_slot(13, 1, 1)
+            .expect("set cropland slot 13 to level 1");
+        village
+            .set_building_level_at_slot(18, 5, 1)
+            .expect("set cropland slot 18 to level 5");
+
+        let missing = missing_building_requirements(&village, &BuildingName::GrainMill);
+
+        assert!(
+            missing.is_empty(),
+            "expected Cropland level 5 to satisfy Grain Mill requirement"
+        );
+    }
 }
 
 fn training_options_for_group(

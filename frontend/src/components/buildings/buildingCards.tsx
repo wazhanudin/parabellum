@@ -65,6 +65,10 @@ function decimalPercent(value: number) {
   return `${Number.isInteger(percent) ? percent.toFixed(0) : percent.toFixed(1)}%`;
 }
 
+function requirementLabel(req: { buildingName: string; requiredLevel: number }) {
+  return `${buildingLabel(req.buildingName)} Level ${req.requiredLevel}`;
+}
+
 function buildingUpgradeValue(buildingName: string, value?: number): BuildingUpgradeValue | null {
   if (value == null || value === 0) return null;
 
@@ -266,7 +270,7 @@ export function EmptySlotBuilding({
         {option.missingRequirements.length > 0 ? (
           <div class="text-xs text-amber-700">
             Missing:{" "}
-            {option.missingRequirements.map((req) => `${buildingLabel(req.buildingName)} ${req.requiredLevel}`).join(", ")}
+            {option.missingRequirements.map(requirementLabel).join(", ")}
           </div>
         ) : null}
         {!affordable ? <div class="text-xs text-red-600">Not enough resources</div> : null}
@@ -576,9 +580,7 @@ export function AcademyOptionCard({
       {blockedByRequirements ? (
         <div class="text-xs text-amber-700">
           Requires:{" "}
-          {option.missingRequirements
-            .map((req) => `${buildingLabel(req.buildingName)} ${req.requiredLevel}`)
-            .join(", ")}
+          {option.missingRequirements.map(requirementLabel).join(", ")}
         </div>
       ) : null}
       {error ? <div class="text-xs text-red-600">{error}</div> : null}

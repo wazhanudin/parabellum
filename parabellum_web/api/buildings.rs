@@ -1806,25 +1806,7 @@ fn missing_building_requirements(
         return vec![];
     };
 
-    data.rules
-        .requirements
-        .iter()
-        .filter_map(|req| {
-            let level = village
-                .get_building_by_name(&req.0)
-                .map(|vb| vb.building.level)
-                .unwrap_or(0);
-
-            if level >= req.1 {
-                None
-            } else {
-                Some(RequirementDto {
-                    building_name: building_key(&req.0),
-                    required_level: req.1,
-                })
-            }
-        })
-        .collect()
+    missing_requirements_from_list(village, data.rules.requirements)
 }
 
 #[cfg(test)]
@@ -2063,7 +2045,7 @@ fn academy_options_for_village(
     for (idx, unit) in units.iter().enumerate() {
         let is_researched = research.get(idx);
         let is_queued = queued_units.contains(&unit.name);
-        let missing_requirements = missing_unit_requirements(village, unit.get_requirements());
+        let missing_requirements = missing_requirements_from_list(village, unit.get_requirements());
         let can_research = !is_researched && missing_requirements.is_empty();
         let time_secs = if unit.research_cost.time == 0 {
             0
@@ -2105,7 +2087,7 @@ fn academy_queue_for_slot(queue: &[AcademyQueueItem]) -> Vec<AcademyQueueItemDto
         .collect()
 }
 
-fn missing_unit_requirements(
+fn missing_requirements_from_list(
     village: &parabellum_game::models::village::Village,
     requirements: &[BuildingRequirement],
 ) -> Vec<RequirementDto> {

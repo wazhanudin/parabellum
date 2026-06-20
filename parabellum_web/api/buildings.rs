@@ -1811,11 +1811,8 @@ fn missing_building_requirements(
         .iter()
         .filter_map(|req| {
             let level = village
-                .buildings()
-                .iter()
-                .filter(|vb| vb.building.name == req.0)
+                .get_building_by_name(&req.0)
                 .map(|vb| vb.building.level)
-                .max()
                 .unwrap_or(0);
 
             if level >= req.1 {
@@ -2116,9 +2113,7 @@ fn missing_unit_requirements(
         .iter()
         .filter_map(|req| {
             let level = village
-                .buildings()
-                .iter()
-                .find(|vb| vb.building.name == req.0)
+                .get_building_by_name(&req.0)
                 .map(|vb| vb.building.level)
                 .unwrap_or(0);
 
